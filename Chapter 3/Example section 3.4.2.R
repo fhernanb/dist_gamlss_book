@@ -10,7 +10,7 @@ gen.Family("TF", type="logit")
 
 # Generate 200 observations with mu=0, sigma=1, nu=1.5
 set.seed(1234567)
-Y <- rlogitTF(200, mu=0, sigma=1, nu=1.5)
+Y <- rlogitTF(n=200, mu=0, sigma=1, nu=1.5)
 
 # To obtain a summary of Y
 min(Y)
@@ -28,7 +28,7 @@ Y[Y == 1] <- 0.9999
 h1 <- histDist(Y, family=logitTF, nbins=20, ylim=c(0,2), xlim=c(0,1),
                line.col=1, nline.wd=2.5, main="(b)")
 
-# We recover the original parameters
+# To recover the original parameters from h1
 coef(h1, what='mu')
 exp(coef(h1, what='sigma')) # link log
 exp(coef(h1, what='nu'))    # link log
