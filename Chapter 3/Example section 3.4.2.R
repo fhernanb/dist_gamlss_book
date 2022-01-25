@@ -1,8 +1,7 @@
-
 library(gamlss)
 
-
-# Example section 3.4.2 ---------------------------------------------------
+# Problem: in this example it is possible to obtain y=0 and/or y=1. We
+# explain how to solve this issue.
 
 gen.Family("TF", type="logit")
 ## A logit family of distributions from TF has been generated
