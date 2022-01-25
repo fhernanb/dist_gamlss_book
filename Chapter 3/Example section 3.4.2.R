@@ -28,8 +28,7 @@ Y[Y == 1] <- 0.9999
 h1 <- histDist(Y, family=logitTF, nbins=20, ylim=c(0,2), xlim=c(0,1),
                line.col=1, nline.wd=2.5, main="(b)")
 
-# We can fit a model to recover the original parameters
-mod <- gamlss(Y ~ 1, family='logitTF')
-coef(mod, what='mu')
-exp(coef(mod, what='sigma')) # link log
-exp(coef(mod, what='nu'))    # link log
+# We recover the original parameters
+coef(h1, what='mu')
+exp(coef(h1, what='sigma')) # link log
+exp(coef(h1, what='nu'))    # link log
