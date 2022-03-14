@@ -1,4 +1,4 @@
-# Repository with R code for Generalized Linear Models
+# Distributions for Modeling Location, Scale, and Shape Using GAMLSS in R
 
 Scripts to complement the book "Distributions for Modeling Location, Scale, and Shape Using GAMLSS in R"
 
