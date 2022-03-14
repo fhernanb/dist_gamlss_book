@@ -1,6 +1,5 @@
 library(gamlss)
 
-
 # First example -----------------------------------------------------------
 
 # generate the distribution
