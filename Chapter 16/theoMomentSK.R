@@ -53,23 +53,39 @@ theoMomentSK(fam="FWE", mu=2, sigma=1, lower=0)
 # Comparing with momentSK using a random sample
 
 # Gumbel distribution explained in section 18.2.1
+curve(dGU(x, mu=1.5, sigma=1.7), from=0, to=20)
 x <- rGU(n=1000000, mu=1.5, sigma=1.7)
 momentSK(x)
 theoMomentSK(fam=GU, mu=1.5, sigma=1.7, lower=-Inf, upper=Inf)
 
 # Logistic distribution explained in section 18.2.2
+curve(dLO(x, mu=1.5, sigma=1.7), from=0, to=20)
 x <- rLO(n=1000000, mu=1.5, sigma=1.7)
 momentSK(x)
 theoMomentSK(fam=LO, mu=1.5, sigma=1.7, lower=-Inf, upper=Inf)
 
 # Exponential distribution explained in section 19.2.1
+curve(dEXP(x, mu=1.5), from=0, to=20)
 x <- rEXP(n=1000000, mu=1.5)
 momentSK(x)
 theoMomentSK(fam=EXP, mu=1.5, lower=0, upper=Inf)
 
 # Inverse gaussian distribution explained in section 19.3.3
-x <- rIG(n=1000, mu=1.5, sigma=1.7)
+curve(dIG(x, mu=1.5, sigma=1.7), from=0, to=20)
+x <- rIG(n=100000, mu=1.5, sigma=1.7)
 momentSK(x)
 theoMomentSK(fam=IG, mu=1.5, sigma=1.7, lower=0, upper=Inf)
+
+# GIG distribution explained in section 19.4.4
+curve(dGIG(x, mu=1, sigma=2, nu=-3), from=0, to=20)
+x <- rGIG(n=1000, mu=1, sigma=2, nu=-3)
+momentSK(x)
+theoMomentSK(fam=GIG, mu=1, sigma=2, nu=-3, lower=0, upper=Inf)
+
+# GB2 distribution explained in section 19.5.3
+curve(dGB2(x, mu=1, sigma=2, nu=3, tau=4), from=0, to=20)
+x <- rGB2(n=10000, mu=1, sigma=2, nu=3, tau=4)
+momentSK(x)
+theoMomentSK(fam=GB2, mu=1, sigma=2, nu=3, tau=4, lower=0, upper=Inf)
 
 
