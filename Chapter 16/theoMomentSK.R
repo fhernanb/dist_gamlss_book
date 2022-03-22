@@ -32,19 +32,24 @@ theoMomentSK <- function(fam="NO", lower=-Inf, upper=Inf, ...) {
 }
 
 
+###########################################################################
+#                            EXAMPLES 
+###########################################################################
+
 # Testing the function with some known distributions
 
 library(gamlss)
+
 theoMomentSK()
 theoMomentSK(fam=NO, mu=3)
 theoMomentSK(fam=NO, mu=2, sigma=2)
 theoMomentSK(fam=GA, lower=0)
 theoMomentSK(fam=GA, mu=2, lower=0)
 theoMomentSK(fam=GA, mu=3, sigma=0.5, lower=0)
-
 theoMomentSK(fam="TF", nu=1)
 
 
+# Using some distributions from RelDists package
 library(RelDists)
 theoMomentSK(fam="LIN", mu=3, lower=0)
 theoMomentSK(fam="FWE", mu=2, sigma=1, lower=0)
@@ -54,25 +59,25 @@ theoMomentSK(fam="FWE", mu=2, sigma=1, lower=0)
 
 # Gumbel distribution explained in section 18.2.1
 curve(dGU(x, mu=1.5, sigma=1.7), from=0, to=20)
-x <- rGU(n=1000000, mu=1.5, sigma=1.7)
+x <- rGU(n=1000, mu=1.5, sigma=1.7)
 momentSK(x)
 theoMomentSK(fam=GU, mu=1.5, sigma=1.7, lower=-Inf, upper=Inf)
 
 # Logistic distribution explained in section 18.2.2
 curve(dLO(x, mu=1.5, sigma=1.7), from=0, to=20)
-x <- rLO(n=1000000, mu=1.5, sigma=1.7)
+x <- rLO(n=1000, mu=1.5, sigma=1.7)
 momentSK(x)
 theoMomentSK(fam=LO, mu=1.5, sigma=1.7, lower=-Inf, upper=Inf)
 
 # Exponential distribution explained in section 19.2.1
 curve(dEXP(x, mu=1.5), from=0, to=20)
-x <- rEXP(n=1000000, mu=1.5)
+x <- rEXP(n=1000, mu=1.5)
 momentSK(x)
 theoMomentSK(fam=EXP, mu=1.5, lower=0, upper=Inf)
 
 # Inverse gaussian distribution explained in section 19.3.3
 curve(dIG(x, mu=1.5, sigma=1.7), from=0, to=20)
-x <- rIG(n=100000, mu=1.5, sigma=1.7)
+x <- rIG(n=1000, mu=1.5, sigma=1.7)
 momentSK(x)
 theoMomentSK(fam=IG, mu=1.5, sigma=1.7, lower=0, upper=Inf)
 
@@ -84,7 +89,7 @@ theoMomentSK(fam=GIG, mu=1, sigma=2, nu=-3, lower=0, upper=Inf)
 
 # GB2 distribution explained in section 19.5.3
 curve(dGB2(x, mu=1, sigma=2, nu=3, tau=4), from=0, to=20)
-x <- rGB2(n=10000, mu=1, sigma=2, nu=3, tau=4)
+x <- rGB2(n=1000, mu=1, sigma=2, nu=3, tau=4)
 momentSK(x)
 theoMomentSK(fam=GB2, mu=1, sigma=2, nu=3, tau=4, lower=0, upper=Inf)
 
