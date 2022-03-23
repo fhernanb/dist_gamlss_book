@@ -13,22 +13,31 @@ theoMomentSK <- function(fam="NO", lower=-Inf, upper=Inf, ...) {
   dfun <- paste("d", fname, sep = "")
   pdf <- eval(parse(text = dfun))
   xk_pdf <- function(x, k=1, ...) x^k * pdf(x, ...)
-  mu1_prime <- integrate(f=xk_pdf, k=1, lower=lower, upper=upper, ...)$value
-  mu2_prime <- integrate(f=xk_pdf, k=2, lower=lower, upper=upper, ...)$value
-  mu3_prime <- integrate(f=xk_pdf, k=3, lower=lower, upper=upper, ...)$value
-  mu4_prime <- integrate(f=xk_pdf, k=4, lower=lower, upper=upper, ...)$value
-  mu2 <- mu2_prime - mu1_prime^2
-  mu3 <- mu3_prime - 3 * mu2_prime * mu1_prime + 2 * mu1_prime^3
-  mu4 <- mu4_prime - 4 * mu3_prime * mu1_prime + 6 * mu2_prime * mu1_prime^2 - 3 * mu1_prime^4
+  # Moments about zero
+  mu1_p <- try(integrate(f=xk_pdf, k=1, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  mu2_p <- try(integrate(f=xk_pdf, k=2, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  mu3_p <- try(integrate(f=xk_pdf, k=3, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  mu4_p <- try(integrate(f=xk_pdf, k=4, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  # If there are some errors in the integrals
+  if (class(mu1_p) == "try-error") mu1_p <- NA
+  if (class(mu2_p) == "try-error") mu2_p <- NA
+  if (class(mu3_p) == "try-error") mu3_p <- NA
+  if (class(mu4_p) == "try-error") mu4_p <- NA
+  # Central moments
+  mu2 <- mu2_p - mu1_p^2
+  mu3 <- mu3_p - 3 * mu2_p * mu1_p + 2 * mu1_p^3
+  mu4 <- mu4_p - 4 * mu3_p * mu1_p + 6 * mu2_p * mu1_p^2 - 3 * mu1_p^4
+  # Skewness and Kurtosis
   gamma.1 <- mu3/mu2^1.5
   beta.2  <- mu4/mu2^2
   gamma.2 <- mu4/mu2^2 - 3
+  # Transforming Skewness and Kurtosis
   tskew <- gamma.1/(1 + abs(gamma.1))
   tkurt <- gamma.2/(1 + abs(gamma.2))
   
   list(mom.skew = gamma.1, trans.mom.skew = tskew, 
        mom.kurt = beta.2, excess.mom.kurt = gamma.2, trans.mom.kurt = tkurt,
-       expected_value = mu1_prime, variance = mu2)
+       expected_value = mu1_p, variance = mu2)
 }
 
 
@@ -46,8 +55,7 @@ theoMomentSK(fam=NO, mu=2, sigma=2)
 theoMomentSK(fam=GA, lower=0)
 theoMomentSK(fam=GA, mu=2, lower=0)
 theoMomentSK(fam=GA, mu=3, sigma=0.5, lower=0)
-theoMomentSK(fam="TF", nu=1)
-
+theoMomentSK(fam="TF", mu=0, sigma=1, nu=1) # Cauchy distribution does not have moments
 
 # Using some distributions from RelDists package
 library(RelDists)

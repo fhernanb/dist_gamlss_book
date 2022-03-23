@@ -25,14 +25,6 @@ shinyServer(function(input, output) {
   
   outputOptions(output, 'nopar', suspendWhenHidden = FALSE)
   
-  # output$type <- reactive({
-  #   the_dist <- identifica(input$distribution)
-  #   the_dist$type
-  # })
-  # 
-  # outputOptions(output, 'type', suspendWhenHidden = FALSE)
-  # output$id<-reactive({identifica(input$distribution)$nopar})
-
   output$distPlot <- renderPlot({
     the_dist <- identifica(dist=input$distribution, input=input$mu)
     if (the_dist$type == "Discrete")
@@ -40,5 +32,11 @@ shinyServer(function(input, output) {
     else
       plot_continuous(input)
     })
+  
+  output$value <- renderPrint({ input$distribution })
+  
+  output$summary <- renderPrint({
+    input
+  })
 
 })

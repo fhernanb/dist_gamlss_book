@@ -71,7 +71,9 @@ identifica <- function(dist, input=NULL) {
 # Funcion para dibujar el diagrama de probabilidades
 # input es el ingreso de la app
 plot_discrete <- function(input) {
+  
   the_dist <- identifica(input$distribution)
+  
   xs <- seq(from=input$minimo, to=input$maximo)
   texto <- eval(paste0("d", input$distribution, "(xs",
                        the_dist$which_param, ")"))
@@ -84,23 +86,24 @@ plot_discrete <- function(input) {
 # Funcion para dibujar la pdf
 # input es el ingreso de la app
 plot_continuous <- function(input) {
+  
   the_dist <- identifica(input$distribution)
   
   param <- extract_param_gamlss_fam(input$distribution) # lista con default parametros
   
-  if (the_dist$nopar == 1) {
-    if (is.na(input$mu)) input$mu <- param$mu
-  }
+  # if (the_dist$nopar == 1) {
+  #   if (is.na(input$mu)) input$mu <- param$mu
+  # }
   
   texto <- eval(paste0("curve(d", input$distribution, "(x",
-                       #the_dist$which_param, 
-                       ",mu=5,sigma=2",
+                       the_dist$which_param, 
+                       #",mu=5,sigma=2",
                        ")",
                        ",from=input$minimo,to=input$maximo,",
                        "col='tomato',lwd=2,las=1,main=the_dist$family,
                        xlab='X', ylab='Density')"))
-  #eval(parse(text=texto))
-  plot(c(-5, 5), c(0, 1), xlab="", ylab="", type='n', main=input$mu, sub=input$sigma)
+  eval(parse(text=texto))
+  #plot(c(-5, 5), c(0, 1), xlab="", ylab="", type='n', main=input$mu, sub=input$sigma)
 }
 
 

@@ -26,7 +26,7 @@ shinyUI(fluidPage(
             selectInput(inputId="distribution",
                         label="Select the gamlss distribution:",
                         choices=grep("^[A-Z ]+$", ls("package:gamlss.dist"), value = TRUE),
-                        selected="GA"),
+                        selected="EXP"),
             
             # Para elegir los valores de los parametros
             conditionalPanel(condition="output.nopar==1",
@@ -122,7 +122,9 @@ shinyUI(fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-            plotOutput("distPlot")
+            plotOutput("distPlot"),
+            verbatimTextOutput("value"),
+            verbatimTextOutput("summary")
         )
     )
 ))
