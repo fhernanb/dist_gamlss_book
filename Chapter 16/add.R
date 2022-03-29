@@ -1,8 +1,20 @@
+# New function add -----------------------------------------------
+# This function can be used to obtain sum of infinite or finite series,
+
+# Arguments
+# f: corresponds to a gamlss family, by default is NO
+# lower: minimum value of the sum, it must be an integer.
+# upper: maximum value of the sum, it must be an integer.
+# ...: additional arguments to f
 
 add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
   
   f <- match.fun(f)
   ff <- function(x) f(x, ...)
+  
+  # To ensure integers
+  lower <- as.integer(lower)
+  upper <- as.integer(upper)
   
   if (lower >= upper) 
     stop("invalid parameter values")
@@ -111,7 +123,6 @@ add(f=function(x, a, b) a*b^(x-1), lower=1, upper=Inf, a=3, b=0.7) # Ans=10
 add(f=function(x, a=3, b=0.7) a*b^(x-1), lower=1, upper=Inf) # Ans=10
 
 # Examples with wrong arguments
-add(f=function(x) 0.5^x, lower=5, upper=-9)
 add(f=function(x) 0.5^x, lower=5, upper=c(9, 15, 20))
 add(f=function(x) a*b^(x-1), lower=1, upper=Inf, a=3, b=0.7)
 add(f=function(x) a*b^(x-1), lower=1, upper=Inf)
