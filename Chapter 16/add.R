@@ -12,8 +12,11 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
   
   # First function
   add_minusinf_to_inf <- function(ff, ..., abs.tol) {
-    x <- 0
-    ans <- 0
+    
+    x <- seq(from=-100, to=100) #to ensure a sum with at least 201 values
+    ans <- sum(ff(x))
+    x <- tail(x, n=1L) + 1 # The next value
+
     while (TRUE) {
       next_term <- ff(x) + ff(-x)
       ans <- ans + next_term
@@ -24,9 +27,12 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
   }
   
   # Second function
-  add_lower_to_inf <- function(f, lower, ..., abs.tol) {
-    x <- lower
-    ans <- 0
+  add_lower_to_inf <- function(ff, lower, ..., abs.tol) {
+    
+    x <- seq(from=lower, to=lower+300) #to ensure a sum with at least 301 values
+    ans <- sum(ff(x))
+    x <- tail(x, n=1L) + 1 # The next value
+    
     while (TRUE) {
       next_term <- ff(x)
       ans <- ans + next_term
@@ -37,9 +43,12 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
   }
   
   # Third function
-  add_minusinf_to_upper <- function(f, upper, ..., abs.tol) {
-    x <- upper
-    ans <- 0
+  add_minusinf_to_upper <- function(ff, upper, ..., abs.tol) {
+    
+    x <- seq(from=upper, to=upper-300) #to ensure a sum with at least 301 values
+    ans <- sum(ff(x))
+    x <- tail(x, n=1L) - 1 # The next value
+    
     while (TRUE) {
       next_term <- ff(x)
       ans <- ans + next_term
@@ -74,6 +83,15 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
 }
 
 # Examples
+library(gamlss)
+
+# ZOIP expected value
+add(f=function(x, mu, sigma) x*dZIP(x, mu, sigma), lower=1, upper=Inf, 
+    mu=7.5, sigma=0.1)
+
+# PO expected value
+add(f=function(x, mu) x*dPO(x, mu), lower=0, upper=Inf, 
+    mu=7.5)
 
 # Poisson expected value
 add(f=function(x, lambda) x*dpois(x, lambda), lower=0, upper=Inf, 
@@ -89,9 +107,12 @@ add(f=function(x) (1/3)^(x-1), lower=1, upper=Inf) # Ans=1.5
 add(f=function(x) 4/(x^2+3*x+2), lower=0, upper=Inf) # Ans=4.0
 add(f=function(x) 1/(x*(log(x)^2)), lower=2, upper=Inf, abs.tol=0.000001) # Ans=2.02
 add(f=function(x) 3*0.7^(x-1), lower=1, upper=Inf) # Ans=10
+add(f=function(x, a, b) a*b^(x-1), lower=1, upper=Inf, a=3, b=0.7) # Ans=10
+add(f=function(x, a=3, b=0.7) a*b^(x-1), lower=1, upper=Inf) # Ans=10
 
 # Examples with wrong arguments
 add(f=function(x) 0.5^x, lower=5, upper=-9)
 add(f=function(x) 0.5^x, lower=5, upper=c(9, 15, 20))
-
+add(f=function(x) a*b^(x-1), lower=1, upper=Inf, a=3, b=0.7)
+add(f=function(x) a*b^(x-1), lower=1, upper=Inf)
 
