@@ -94,7 +94,9 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
   return(wk)
 }
 
-# Examples
+###########################################################################
+#                            EXAMPLES 
+###########################################################################
 library(gamlss)
 
 # ZOIP expected value
