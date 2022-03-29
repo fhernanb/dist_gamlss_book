@@ -1,12 +1,3 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 library(gamlss)
 library(gamlss.dist)
@@ -25,18 +16,31 @@ shinyServer(function(input, output) {
   
   outputOptions(output, 'nopar', suspendWhenHidden = FALSE)
   
+  # Primer output
   output$distPlot <- renderPlot({
     the_dist <- identifica(dist=input$distribution, input=input$mu)
     if (the_dist$type == "Discrete")
       plot_discrete(input)
     else
       plot_continuous(input)
-    })
+    }, res = 96)
   
   output$value <- renderPrint({ input$distribution })
   
   output$summary <- renderPrint({
     input
+  })
+  
+  # Segundo output
+  output$sk <- renderPrint({ 
+    the_dist <- identifica(input$distribution)
+    theoMomentSK(fam=input$distribution, mu=3)
+    texto <- eval(paste0("theoMomentSK(fam=", input$distribution,
+                         the_dist$which_param,
+                         limites(input$distribution),
+                         ")"))
+    print(texto)
+    eval(parse(text=texto))
   })
 
 })
