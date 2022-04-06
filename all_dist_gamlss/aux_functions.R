@@ -127,10 +127,18 @@ theoMomentSK <- function(fam="NO", lower=-Inf, upper=Inf, ...) {
   pdf <- eval(parse(text = dfun))
   xk_pdf <- function(x, k=1, ...) x^k * pdf(x, ...)
   # Moments about zero
-  mu1_p <- try(integrate(f=xk_pdf, k=1, lower=lower, upper=upper, ...)$value, silent=TRUE)
-  mu2_p <- try(integrate(f=xk_pdf, k=2, lower=lower, upper=upper, ...)$value, silent=TRUE)
-  mu3_p <- try(integrate(f=xk_pdf, k=3, lower=lower, upper=upper, ...)$value, silent=TRUE)
-  mu4_p <- try(integrate(f=xk_pdf, k=4, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  if (fam$type == "Discrete") {
+    mu1_p <- try(add(f=xk_pdf, k=1, lower=lower, upper=upper, ...)$value, silent=TRUE)
+    mu2_p <- try(add(f=xk_pdf, k=2, lower=lower, upper=upper, ...)$value, silent=TRUE)
+    mu3_p <- try(add(f=xk_pdf, k=3, lower=lower, upper=upper, ...)$value, silent=TRUE)
+    mu4_p <- try(add(f=xk_pdf, k=4, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  }
+  else {
+    mu1_p <- try(integrate(f=xk_pdf, k=1, lower=lower, upper=upper, ...)$value, silent=TRUE)
+    mu2_p <- try(integrate(f=xk_pdf, k=2, lower=lower, upper=upper, ...)$value, silent=TRUE)
+    mu3_p <- try(integrate(f=xk_pdf, k=3, lower=lower, upper=upper, ...)$value, silent=TRUE)
+    mu4_p <- try(integrate(f=xk_pdf, k=4, lower=lower, upper=upper, ...)$value, silent=TRUE)
+  }
   # If there are some errors in the integrals
   if (class(mu1_p) == "try-error") mu1_p <- NA
   if (class(mu2_p) == "try-error") mu2_p <- NA

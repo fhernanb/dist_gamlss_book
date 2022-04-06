@@ -7,14 +7,10 @@
 # upper: maximum value of the sum, it must be an integer.
 # ...: additional arguments to f
 
-add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
+add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps) {
   
   f <- match.fun(f)
   ff <- function(x) f(x, ...)
-  
-  # To ensure integers
-  lower <- as.integer(lower)
-  upper <- as.integer(upper)
   
   if (lower >= upper) 
     stop("invalid parameter values")
@@ -35,7 +31,7 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
       if (abs(next_term) < abs.tol) break
       x <- x + 1
     }
-    ans
+    list(value=ans, abs.error=abs(next_term))
   }
   
   # Second function
@@ -51,7 +47,7 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
       if (abs(next_term) < abs.tol) break
       x <- x + 1
     }
-    ans
+    list(value=ans, abs.error=abs(next_term))
   }
   
   # Third function
@@ -67,7 +63,7 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
       if (abs(next_term) < abs.tol) break
       x <- x - 1
     }
-    ans
+    list(value=ans, abs.error=abs(next_term))
   }
   
   # End my auxiliar functions --------------------------------------------------
@@ -75,6 +71,7 @@ add <- function (f, lower, upper, ..., abs.tol = .Machine$double.eps^0.25) {
   # Sum with finite lower and upper
   if (is.finite(lower) && is.finite(upper)) {
     wk <- sum(ff(seq(from=lower, to=upper, by=1)))
+    wk <- list(value=wk, abs.error=0)
   }
   
   else {
@@ -118,7 +115,7 @@ add(f=function(x, size, prob) x*dbinom(x, size, prob), lower=0, upper=20,
 # Examples with infinite series
 add(f=function(x) 0.5^x, lower=0, upper=100) # Ans=2
 add(f=function(x) (1/3)^(x-1), lower=1, upper=Inf) # Ans=1.5
-add(f=function(x) 4/(x^2+3*x+2), lower=0, upper=Inf) # Ans=4.0
+add(f=function(x) 4/(x^2+3*x+2), lower=0, upper=Inf, abs.tol=0.001) # Ans=4.0
 add(f=function(x) 1/(x*(log(x)^2)), lower=2, upper=Inf, abs.tol=0.000001) # Ans=2.02
 add(f=function(x) 3*0.7^(x-1), lower=1, upper=Inf) # Ans=10
 add(f=function(x, a, b) a*b^(x-1), lower=1, upper=Inf, a=3, b=0.7) # Ans=10
@@ -129,3 +126,10 @@ add(f=function(x) 0.5^x, lower=5, upper=c(9, 15, 20))
 add(f=function(x) a*b^(x-1), lower=1, upper=Inf, a=3, b=0.7)
 add(f=function(x) a*b^(x-1), lower=1, upper=Inf)
 
+# Examples with discrete distribution
+
+pmf <- function(x) {
+  0.5^(x+1) + 0.5 * 2^(x-1)/3^x  # x = 1, 2, ..., Inf
+}
+
+add(f=pmf, lower=1, upper=Inf)
