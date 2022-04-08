@@ -145,11 +145,15 @@ The presence of outliers may provoke big errors in the estimation procedures [@r
 
 ### Example 1: Bounded data in (0, 1) (Mixture model with beta distribution)
 
-The example use an mixture distribution to fit robust model by using GAMLSS with bounded data. The reference distribution is the Beta distribution $Beta(5,5)$ with symmetric shape around the value 0.5.
+The example uses a mixture distribution to fit robust model by using GAMLSS with bounded data. The reference distribution is the Beta distribution $Beta(5,5)$ with symmetric shape around the value 0.5.
+
 The pattern of the contamination two-side is defined as follow:
+
 $$
 \alpha_1{\cal U}(0, 0.1)+\alpha_2{\cal U}(0.9, 1)+(1-\alpha_1-\alpha_2)Beta(5,5).
-$$ Here, $n=500,$ $\alpha_1=0.01=1\%$ (contamination to lower-tail), $\alpha_2=0.01=1\%$ (contamination to upper-tail).  On the contamination model we expect to generate potential extreme values that can affect the estimation of the Beta model parameters.
+$$ 
+
+Here, $n=500,$ $\alpha_1=0.01=1\%$ (contamination to lower-tail), $\alpha_2=0.01=1\%$ (contamination to upper-tail).  On the contamination model we expect to generate potential extreme values that can affect the estimation of the Beta model parameters.
 
 ```{r, echo=F, warning=FALSE, message=FALSE}
 # Mixture of three distributions
@@ -245,6 +249,7 @@ as_tibble(out_14) %>% kable(caption = "Rosner test -  k based on Hampel criterio
                   c("striped", "hover", "condensed", "responsive"), 
                 full_width = FALSE, font_size = 12) %>% column_spec(c(5,8), bold = TRUE)
 ```
+
 The Rosner’s Tests show that any of observation are outlier based on the two criteria of detection. However, this result can be masked by normality violation of data. 
 
 Finally, we apply the semiparametric method based on kernel smoothing and extreme value theory [@holevsovsky2018semiparametric; @vcampulova2018nonparametric; @holevsovsky2020estimation] for outlier detection. The outliers are identified as observations whose values are exceeded on a certain average by using the function `RDetect.outliers.EV()` of the `envoutliers` package in `R` .  According to the kernel approach, there are 9 outliers.
@@ -263,27 +268,28 @@ out_pot %>% kable(caption = "Kernel criterion") %>%
                   c("striped", "hover", "condensed", "responsive"), 
                 full_width = FALSE, font_size = 12)
 ```
+
 # GAMLSS fit
 We are looking for any lawful curves in the data that may suggest that the fitted model is better or worse at predictions.  Worm-plots  [@buuren2001worm] can be used to identify some characteristics of the data that are not adequately captured by the fitted model via GAMLSS. We fit the data as a [rigby2019distributions] subsection 12.2.2. 
 
 ```{r,  echo = FALSE, fig.width = 13, fig.height=4, warning=FALSE, message=FALSE, ,  results='hide'}
 # fitting BEo to contaminated data
 # True
-b1<-gamlss(y~1,family=BEo,n.cyc=100, trace=FALSE)
+b1 <- gamlss(y~1,family=BEo, n.cyc=100, trace=FALSE)
 p.1 <- mywormplot(b1)+theme_bw()+ggtitle("Fit using Beta distribution")
 r.1 <- cbind(fitted(b1)[1], fitted(b1,"sigma")[1])
 
 # fit with bias correction 
 mu1 <- 5
 sigma1 <- 5
-b2 <- gamlss(y~1,family=BEor,n.cyc=100, trace=FALSE)
+b2 <- gamlss(y~1,family=BEor, n.cyc=100, trace=FALSE)
 r.2 <- cbind(fitted(b2)[1], fitted(b2,"sigma")[1])
 
 #wp(b3, ylim.all=1)
 p.2 <- mywormplot(b2)+theme_bw()+ggtitle("Fit using Beta distribution with bias correction")
 
 # fit via robust estimation based on 
-b3 <- gamlssRobust(b2,bound=2.878162, CD.bound=3.208707,trace=FALSE)
+b3 <- gamlssRobust(b2, bound=2.878162, CD.bound=3.208707,trace=FALSE)
 r.3 <- cbind(fitted(b3)[1], fitted(b3,"sigma")[1])
 #wp(b3, ylim.all=1.5)
 p.3 <- mywormplot(b3)+theme_bw()+ggtitle("Robust fit")
@@ -291,6 +297,7 @@ p.3 <- mywormplot(b3)+theme_bw()+ggtitle("Robust fit")
 out <- grid.arrange(p.1, p.2, p.3, ncol=3)
 return(out)
 ```
+
 By visual inspection of the worm plots we observe that the robust fit produces the better fit of the data. 
 
 
@@ -304,6 +311,7 @@ as_tibble(cbind(Parameter, mu, sigma)) %>% kable(caption = "Fit results") %>%
                   c("striped", "hover", "condensed", "responsive"), 
                 full_width = FALSE, font_size = 12)
 ```
+
 # Comparison of the fits to the contaminated beta data
 
 ```{r,  echo = FALSE, fig.width = 13, fig.height=4, warning=FALSE, message=FALSE}
