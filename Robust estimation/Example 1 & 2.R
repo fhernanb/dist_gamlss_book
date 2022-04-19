@@ -48,7 +48,8 @@ p2 <- ggplot(datos1, aes(x = "", y = y)) +
 
 out <- grid.arrange(p1, p2, ncol=2)
 
-ggsave(plot=out, file="Robust estimation/data_example_1.pdf", width = 6, height = 3)
+ggsave(plot=out, file="Robust estimation/data_example_1.pdf", 
+       width = 6, height = 3)
 
 # exGaussina example
 
@@ -71,7 +72,8 @@ p2 <- ggplot(datos2, aes(x = "", y = y)) +
 
 out <- grid.arrange(p1, p2, ncol=2)
 
-ggsave(plot=out, file="Robust estimation/data_example_2.pdf", width = 6, height = 3)
+ggsave(plot=out, file="Robust estimation/data_example_2.pdf", 
+       width = 6, height = 3)
 
 
 # Fitting the models ------------------------------------------------------
@@ -88,7 +90,8 @@ r1 <- cbind(fitted(mod_BEo)[1],
 # fit with bias correction 
 mod_BEo_correct <- gamlss(y~1, family=BEor, n.cyc=100, trace=FALSE, data=datos1)
 
-p2 <- mywormplot(mod_BEo_correct) + theme_bw() +  ggtitle("Beta with bias correction")
+p2 <- mywormplot(mod_BEo_correct) + theme_bw() +  
+  ggtitle("Beta with bias correction")
 r2 <- cbind(fitted(mod_BEo_correct)[1], 
             fitted(mod_BEo_correct, "sigma")[1])
 
@@ -96,7 +99,8 @@ r2 <- cbind(fitted(mod_BEo_correct)[1],
 mod_BEo_rob <- gamlssRobust(mod_BEo_correct, bound=2.878162, 
                             CD.bound=3.208707, trace=FALSE)
 
-p3 <- mywormplot(mod_BEo_rob) + theme_bw() + ggtitle("Robust fitting")
+p3 <- mywormplot(mod_BEo_rob) + theme_bw() + 
+  ggtitle("Robust fitting")
 r3 <- cbind(fitted(mod_BEo_rob)[1], 
             fitted(mod_BEo_rob, "sigma")[1])
 
@@ -129,7 +133,7 @@ r4 <- cbind(fitted(mod_exgaus)[1],
 
 # ExGaussian fit via robust estimation based  
 mod_exgaus_rob <- gamlssRobust(mod_exgaus,
-                               bound=2.878162, CD.bound=3.208707,trace=FALSE)
+                               bound=2.878162, CD.bound=3.208707, trace=FALSE)
 
 p5 <- mywormplot(mod_exgaus_rob)+theme_bw()+ggtitle("Robust ExGaussian")
 r5 <- cbind(fitted(mod_exgaus_rob)[1], 
@@ -170,11 +174,14 @@ p1_ex1 <- ggplot(data = datos1) +
   geom_histogram(aes(x=y, y = ..density..), bins=14, 
                  colour="black", fill="white") +
   geom_function(aes(colour = "Non-robust"), 
-                fun = dBEo, n = 10001, args = list(mu=mu_beta[1], sigma=sigma_beta[1])) +
+                fun = dBEo, n = 10001, 
+                args = list(mu=mu_beta[1], sigma=sigma_beta[1])) +
   geom_function(aes(colour = "Robust"), 
-                fun = dBEo, n = 10001, args = list(mu=mu_beta[3], sigma=sigma_beta[3])) +
+                fun = dBEo, n = 10001, 
+                args = list(mu=mu_beta[3], sigma=sigma_beta[3])) +
   geom_function(aes(colour = "True"), 
-                fun = dBEo, n = 10001, args = list(mu=mu_beta[4], sigma=sigma_beta[4])) +
+                fun = dBEo, n = 10001, 
+                args = list(mu=mu_beta[4], sigma=sigma_beta[4])) +
   labs(x=expression(italic(y)), y=expression(italic(f(y))),
        title="Beta - PDF") +
   labs(color="Model")  +
@@ -191,11 +198,14 @@ p2_ex1 <- ggplot(data = datos1) +
   stat_ecdf(aes(x=y), geom="point", 
             colour=gray(.5), shape=1, size=0.9) + 
   geom_function(aes(colour = "Non-robust"), 
-                fun = pBEo, n = 10001, args = list(mu=mu_beta[1], sigma=sigma_beta[1])) +
+                fun = pBEo, n = 10001, 
+                args = list(mu=mu_beta[1], sigma=sigma_beta[1])) +
   geom_function(aes(colour = "Robust"), 
-                fun = pBEo, n = 10001, args = list(mu=mu_beta[3], sigma=sigma_beta[3])) +
+                fun = pBEo, n = 10001, 
+                args = list(mu=mu_beta[3], sigma=sigma_beta[3])) +
   geom_function(aes(colour = "True"), 
-                fun = pBEo, n = 10001, args = list(mu=mu_beta[4], sigma=sigma_beta[4])) +
+                fun = pBEo, n = 10001, 
+                args = list(mu=mu_beta[4], sigma=sigma_beta[4])) +
   labs(x=expression(italic(y)), y=expression(italic(F(y))),
        title="Beta - CDF") +
   labs(color="Model")  +
@@ -299,10 +309,12 @@ p2_ex2 <- ggplot(data = datos2) +
 # Hazard
 
 haz_exGAUS <- function(x, mu, sigma, nu) {
-  dexGAUS(x, mu=mu, sigma=sigma, nu=nu) / pexGAUS(x, mu=mu, sigma=sigma, nu=nu, lower.tail=FALSE)
+  dexGAUS(x, mu=mu, sigma=sigma, nu=nu) / 
+    pexGAUS(x, mu=mu, sigma=sigma, nu=nu, lower.tail=FALSE)
 }
 
-datos2$h <- haz_exGAUS(x=datos2$y, mu=mu_exg[3], sigma=sigma_exg[3], nu=nu_exg[3])
+datos2$h <- haz_exGAUS(x=datos2$y, mu=mu_exg[3], 
+                       sigma=sigma_exg[3], nu=nu_exg[3])
 
 p3_ex2 <- ggplot(data=datos2, aes(x=y, y=h)) + 
   geom_point(colour=gray(.5), shape=1, size=0.9) +
