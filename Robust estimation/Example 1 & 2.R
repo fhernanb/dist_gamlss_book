@@ -45,7 +45,7 @@ p2 <- ggplot(datos1, aes(x = "", y = y)) +
 
 out <- grid.arrange(p1, p2, ncol=2)
 
-ggsave(plot=out, file="data_example_1.pdf", width = 6, height = 3)
+ggsave(plot=out, file="Robust estimation/data_example_1.pdf", width = 6, height = 3)
 
 # Caso exgaussian %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -68,7 +68,7 @@ p2 <- ggplot(datos2, aes(x = "", y = y)) +
 
 out <- grid.arrange(p1, p2, ncol=2)
 
-ggsave(plot=out, file="data_example_2.pdf", width = 6, height = 3)
+ggsave(plot=out, file="Robust estimation/data_example_2.pdf", width = 6, height = 3)
 
 # Ajustando los modelos ---------------------------------------------------
 
@@ -153,7 +153,8 @@ nu_exg <- c(fitted(mod_exgaus,"nu")[1],
 out <- grid.arrange(p1, p2, p3, p4, p5, ncol=3)
 return(out)
 
-ggsave(plot=out, file="wp_both_examples.pdf", width = 12, height = 7)
+ggsave(plot=out, file="Robust estimation/wp_both_examples.pdf", 
+       width = 12, height = 7)
 
 
 # Comparando los resultados -----------------------------------------------
@@ -332,6 +333,6 @@ out_both_examples <- grid.arrange(p1_ex1, p2_ex1, p3_ex1,
                                   p1_ex2, p2_ex2, p3_ex2,
                                   ncol=3)
 
-ggsave(plot=out_both_examples, file="3plots_both_examples.pdf", 
+ggsave(plot=out_both_examples, file="Robust estimation/3plots_both_examples.pdf", 
        width = 13, height = 8)
 
