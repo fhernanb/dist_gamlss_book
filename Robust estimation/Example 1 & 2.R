@@ -1,22 +1,25 @@
+# This script contains the R codes to replicate the examples
+# of gamlssRobust( ) function with contaminated data.
 
-source("Robust estimation/BEor.R")
-source("Robust estimation/BEorb.R")
-source("Robust estimation/gamlssRobust.R")
-source("Robust estimation/mywormplot.R")
-
-
+# Required libraries
 library(gamlss)
 library(tibble)
 library(ggplot2)
 library(gridExtra)
 library(kableExtra)
 library(tidyverse)
-
 library(CPHshape)
 library(outliers)
 library(EnvStats)
 library(envoutliers)
 
+# First we need to load some scripts
+source("Robust estimation/BEor.R")
+source("Robust estimation/BEorb.R")
+source("Robust estimation/gamlssRobust.R")
+source("Robust estimation/mywormplot.R")
+
+# To load the simulated data
 source("Robust estimation/simulated data.R")
 
 datos1 <- data.frame(y=y1)
@@ -24,9 +27,9 @@ datos2 <- data.frame(y=y2)
 
 # Creando el histograma y boxplot -----------------------------------------
 
-# Caso beta %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Beta example
 
-# Histograma
+# Histogram
 p1 <- ggplot(data = datos1) +
   geom_histogram(aes(x=y, y=..density..), 
                  bins = nclass.scott(datos1$y), 
@@ -47,9 +50,9 @@ out <- grid.arrange(p1, p2, ncol=2)
 
 ggsave(plot=out, file="Robust estimation/data_example_1.pdf", width = 6, height = 3)
 
-# Caso exgaussian %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# exGaussina example
 
-# Histograma
+# Histogram
 p1 <- ggplot(data = datos2) +
   geom_histogram(aes(x=y, y=..density..), 
                  bins = nclass.scott(datos2$y), 
@@ -70,9 +73,10 @@ out <- grid.arrange(p1, p2, ncol=2)
 
 ggsave(plot=out, file="Robust estimation/data_example_2.pdf", width = 6, height = 3)
 
-# Ajustando los modelos ---------------------------------------------------
 
-# Caso beta %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Fitting the models ------------------------------------------------------
+
+# Beta example
 
 # BEo
 mod_BEo <- gamlss(y~1, family=BEo, n.cyc=100, trace=FALSE, data=datos1)
@@ -113,7 +117,7 @@ sigma_beta <- c(fitted(mod_BEo,"sigma")[1],
                 fitted(mod_BEo_rob,"sigma")[1], 
                 5)
 
-# Caso exgaussian %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# exGaussian example
 
 # ExGaussian
 mod_exgaus <- gamlss(y~1,family=exGAUS,n.cyc=100, trace=FALSE, data=datos2)
@@ -148,7 +152,7 @@ nu_exg <- c(fitted(mod_exgaus,"nu")[1],
             fitted(mod_exgaus_rob,"nu")[1], 
             3)
 
-# Graficos wormplot
+# wormplots
 
 out <- grid.arrange(p1, p2, p3, p4, p5, ncol=3)
 return(out)
@@ -157,9 +161,10 @@ ggsave(plot=out, file="Robust estimation/wp_both_examples.pdf",
        width = 12, height = 7)
 
 
-# Comparando los resultados -----------------------------------------------
 
-# Caso beta %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Comparing the results ---------------------------------------------------
+
+# Beta example
 
 p1_ex1 <- ggplot(data = datos1) + 
   geom_histogram(aes(x=y, y = ..density..), bins=14, 
@@ -233,8 +238,7 @@ p3_ex1 <- ggplot(data=datos1, aes(x=y, y=h)) +
   scale_colour_manual(values = c("red", "green3", gray(.5)))
 
 
-
-# Caso exgaussian %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# exGaussian example
 
 p1_ex2 <- ggplot(data = datos2) + 
   geom_histogram(aes(x=y, y = ..density..), bins=20,
@@ -326,8 +330,7 @@ p3_ex2 <- ggplot(data=datos2, aes(x=y, y=h)) +
   scale_colour_manual(values = c("red", "green3", gray(.5)))
 
 
-
-# Para crear la figura conjunta 
+# To create the joint figure
 
 out_both_examples <- grid.arrange(p1_ex1, p2_ex1, p3_ex1, 
                                   p1_ex2, p2_ex2, p3_ex2,
