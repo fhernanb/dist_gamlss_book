@@ -119,34 +119,50 @@ xtable(los_out)
 # Ajustando los modelos ---------------------------------------------------
 
 # fitting BEo to contaminated data
+
 # True
-b1 <- gamlss(y~1, family=BEo, n.cyc=100, trace=FALSE)
-p1 <- mywormplot(b1) + 
+true_mod <- gamlss(y~1,family=BEo,n.cyc=100, trace=FALSE,
+                   mu.fix = TRUE, mu.start=5,
+                   sigma.fix = TRUE, sigma.start=5)
+
+p0 <- mywormplot(true_mod)+theme_bw()+ggtitle("True model")
+
+# BEo
+mod_BEo <- gamlss(y~1, family=BEo, n.cyc=100, trace=FALSE)
+
+p1 <- mywormplot(mod_BEo) + 
   theme_bw() + 
   ggtitle("Beta")
-r1 <- cbind(fitted(b1)[1], fitted(b1, "sigma")[1])
+
+r1 <- cbind(fitted(mod_BEo)[1], fitted(mod_BEo, "sigma")[1])
 
 # fit with bias correction 
-b2 <- gamlss(y~1, family=BEor, n.cyc=100, trace=FALSE)
-r2 <- cbind(fitted(b2)[1], fitted(b2, "sigma")[1])
+mod_BEo_correct <- gamlss(y~1, family=BEor, n.cyc=100, trace=FALSE)
 
-#wp(b3, ylim.all=1)
-p2 <- mywormplot(b2) + 
+p2 <- mywormplot(mod_BEo_correct) + 
   theme_bw() + 
   ggtitle("Beta with bias correction")
 
+r2 <- cbind(fitted(mod_BEo_correct)[1], fitted(mod_BEo_correct, "sigma")[1])
+
 # fit via robust estimation based on 
-b3 <- gamlssRobust(b2, bound=2.878162, CD.bound=3.208707, trace=FALSE)
-r3 <- cbind(fitted(b3)[1], fitted(b3, "sigma")[1])
-#wp(b3, ylim.all=1.5)
-p3 <- mywormplot(b3) + 
+mod_BEo_rob <- gamlssRobust(mod_BEo_correct, bound=2.878162, 
+                            CD.bound=3.208707, trace=FALSE)
+
+p3 <- mywormplot(mod_BEo_rob) + 
   theme_bw() + 
   ggtitle("Robust fitting")
+
+r3 <- cbind(fitted(mod_BEo_rob)[1], fitted(mod_BEo_rob, "sigma")[1])
 
 out <- grid.arrange(p1, p2, p3, ncol=3)
 return(out)
 
 ggsave(plot=out, file="wp_example_1.pdf", width = 13, height = 4)
+
+ggsave(plot=grid.arrange(p0, p1, p3, ncol=3), 
+       file="wp_example_1_true_usual_robust.pdf", 
+       width = 13, height = 4)
 
 
 # Para crear la tabla con los parametros estimados ------------------------
@@ -157,12 +173,12 @@ true_sigma <- 5
 Model <- c("Beta", 
            "Beta with bias correction", 
            "Robust fitting", "True")
-mu <- c(fitted(b1,"mu")[1], fitted(b2,"mu")[1], 
-        fitted(b3,"mu")[1], true_mu)
-sigma <- c(fitted(b1,"sigma")[1], fitted(b2,"sigma")[1], 
-           fitted(b3,"sigma")[1], true_sigma)
+mu <- c(fitted(mod_BEo,"mu")[1], fitted(mod_BEo_correct,"mu")[1], 
+        fitted(mod_BEo_rob,"mu")[1], true_mu)
+sigma <- c(fitted(mod_BEo,"sigma")[1], fitted(mod_BEo_correct,"sigma")[1], 
+           fitted(mod_BEo_rob,"sigma")[1], true_sigma)
 
-aic <- c(AIC(b1), AIC(b2), AIC(b3), NA)
+aic <- c(AIC(mod_BEo), AIC(mod_BEo_correct), AIC(mod_BEo_rob), NA)
 
 tabla_resumen <- data.frame(Model, mu, sigma, aic)
 tabla_resumen
@@ -176,17 +192,18 @@ xtable(tabla_resumen)
 # Density
 datos <- data.frame(y=y)
 
-p1 <- ggplot(data = datos) + 
+p1_ex1 <- ggplot(data = datos) + 
   geom_histogram(aes(x=y, y = ..density..),
                  bins = nclass.scott(y), 
                  colour="black", fill="white") +
-  geom_function(aes(colour = "Beta"), 
+  geom_function(aes(colour = "Non-robust"), 
                 fun = dBEo, n = 10001, args = list(mu=mu[1], sigma=sigma[1])) +
-  geom_function(aes(colour = "Beta with bias correction"), 
-                fun = dBEo, n = 10001, args = list(mu=mu[2], sigma=sigma[2])) +
-  geom_function(aes(colour = "Robust fitting"), 
+  geom_function(aes(colour = "Robust"), 
                 fun = dBEo, n = 10001, args = list(mu=mu[3], sigma=sigma[3])) +
-  labs(x=expression(italic(y)), y=expression(italic(f(y)))) +
+  geom_function(aes(colour = "True"), 
+                fun = dBEo, n = 10001, args = list(mu=mu[4], sigma=sigma[4])) +
+  labs(x=expression(italic(y)), y=expression(italic(f(y))),
+       title="Beta - PDF") +
   labs(color="Model")  +
   theme(
     legend.background = element_rect(fill = "transparent"),
@@ -199,20 +216,22 @@ p1 <- ggplot(data = datos) +
 
 # CDF
 
-p2 <- ggplot(data = datos) + 
+p2_ex1 <- ggplot(data = datos) + 
   stat_ecdf(data = as.data.frame(y), aes(x=y), geom="point", 
             colour=gray(.5), shape=1, size=0.9) + 
-  geom_function(aes(colour = "Beta"), 
+  geom_function(aes(colour = "Non-robust"), 
                 fun = pBEo, n = 10001, args = list(mu=mu[1], sigma=sigma[1])) +
-  geom_function(aes(colour = "Beta with bias correction"), 
-                fun = pBEo, n = 10001, args = list(mu=mu[2], sigma=sigma[2])) +
-  geom_function(aes(colour = "Robust fitting"), 
+  geom_function(aes(colour = "Robust"), 
                 fun = pBEo, n = 10001, args = list(mu=mu[3], sigma=sigma[3])) +
-  labs(x=expression(italic(y)), y=expression(italic(F(y)))) +
+  geom_function(aes(colour = "True"), 
+                fun = pBEo, n = 10001, args = list(mu=mu[4], sigma=sigma[4])) +
+  labs(x=expression(italic(y)), y=expression(italic(F(y))),
+       title="Beta - CDF") +
   labs(color="Model")  +
   theme(
     legend.background = element_rect(fill = "transparent"),
-    legend.position = c(.03, 0.995),
+    #legend.position = c(.03, 0.995),
+    legend.position = "none",
     legend.justification = c("left", "top"),
     legend.box.just = "left",
     legend.margin = margin(0, 0, 0, 0)
@@ -225,27 +244,29 @@ haz_BEo <- function(x, mu, sigma) {
   dBEo(x, mu=mu, sigma=sigma) / pBEo(x, mu=mu, sigma=sigma, lower.tail=FALSE)
 }
 
-p3 <- ggplot(data = data.frame(x = 0), mapping = aes(x = x)) + 
-  stat_function(aes(colour = "Beta"), 
+p3_ex1 <- ggplot(data = data.frame(x = 0), mapping = aes(x = x)) + 
+  stat_function(aes(colour = "Non-robust"), 
                 fun=haz_BEo, args=list(mu=mu[1], sigma=sigma[1])) + 
-  stat_function(aes(colour = "Beta with bias correction"),
-                fun=haz_BEo, args=list(mu=mu[2], sigma=sigma[2])) +
-  stat_function(aes(colour = "Robust fitting"),
+  stat_function(aes(colour = "Robust"),
                 fun=haz_BEo, args=list(mu=mu[3], sigma=sigma[3])) +
+  stat_function(aes(colour = "True"),
+                fun=haz_BEo, args=list(mu=mu[4], sigma=sigma[4])) +
   xlim(0.01, 0.99) +
-  labs(x=expression(italic(y)), y=expression(italic(h(y)))) +
+  labs(x=expression(italic(y)), y=expression(italic(h(y))),
+       title="Beta - Hazard") +
   labs(color="Model")  +
   theme(
     legend.background = element_rect(fill = "transparent"),
-    legend.position = c(.03, 0.995),
+    #legend.position = c(.03, 0.995),
+    legend.position = "none",
     legend.justification = c("left", "top"),
     legend.box.just = "left",
     legend.margin = margin(0, 0, 0, 0)
   )
 
 
-out <- grid.arrange(p1, p2, p3, ncol=3)
+out_ex1 <- grid.arrange(p1_ex1, p2_ex1, p3_ex1, ncol=3)
 
-ggsave(plot=out, file="3plots_example_1.pdf", width = 13, height = 4)
+ggsave(plot=out_ex1, file="3plots_example_1.pdf", width = 13, height = 4)
 
 
