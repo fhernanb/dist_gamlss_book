@@ -1,0 +1,182 @@
+---
+title: "A GAMLSS re-analysis of an RT data set (with a focus on data's shape)"
+author: "Fernando Marmolejo-Ramos"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+# Introduction
+
+The following features GAMLSS techniques to model a data set. The data set will be from a study by Moret-Tatay ^[Moret-Tatay, C. et al. (2022). The effect of corrective feedback in basic cognitive tasks: a study in early childhood. _Children, 9_, 145. https://doi.org/10.3390/children9020145]. A short tutorial on GAMLSS can be found in Stasinopoulos et al. (2018) ^[Stasinopoulos, M. D., Rigby, R. A., & Bastiani, F. D. (2018). GAMLSS: A distributional regression approach. _Statistical Modelling, 18_(3–4), 248–273.]. 
+
+The plan is to showcase GAMLSS techniques to model the data's shape; i.e. skewness and kurtosis. A paper that describes this approach can be found in de Bastiani et al. (in press) ^[de Bastiani, F. et al (in press). Bucket plot: a visual tool for skewness and kurtosis comparisons. _Brazilian Journal of Probability and Statistics_].
+
+# Uploading the data
+
+```{r, warning=FALSE, message=FALSE}
+# data can be easily uploaded via the 'import dataset' tab in R studio...
+library(readxl)
+data <- read_excel(file.choose())
+
+
+# retaining correct RTs that are between 250 and 1800 milliseconds
+data2 <- subset(data, RT<1800 & RT>250 & Accuracy==1)
+
+# ensuring all variables of interest are well
+data2$Participant <- as.factor(data2$Participant)
+data2$Group <- as.factor(data2$Group)
+data2$Condition <- as.factor(data2$Condition)
+```
+
+# Modelling the shape of the model
+
+First some GAMLSS models are created. The models will consider all the distribution's parameters. Specifically the Normal (N) and ExGaussian (EG) distributions are considered.
+
+```{r, warning=FALSE, message=FALSE}
+library(gamlss)
+# model
+mu<-as.formula(RT ~ Group * Condition + random(Participant))
+sigma<-mu
+nu<-mu
+
+
+# two-parameters normal model
+
+N <- gamlss(mu, 
+            sigma.formula = sigma,
+               family = NO,
+               data=data2)
+
+# three parameters exGaussian
+
+EG <- gamlss(mu, 
+            sigma.formula = sigma,
+            nu.formula = nu,
+               family = exGAUS,
+               data=data2)
+
+```
+Let's examine the models's AIC values and look at the residuals.
+
+```{r, warning=FALSE, message=FALSE}
+
+# N and EG fits
+list(normal_fit = N$aic, EG_fit = EG$aic)
+
+# residuals
+
+plot(N)
+plot(EG)
+```
+
+The EG model gives a better fit as shown by the AIC and the residual plots. Ideally, residuals should have a mean of 0, variance = 1, skewness = 0, and kurtosis = 3.
+
+In case a list of distributions need to be inspected, the following marginal distribution fitting can assist in doing so.
+
+```{r, warning=FALSE, message=FALSE}
+
+list<-fitDist(data2$RT, type='realplus')
+list
+```
+
+The results indicate the four-parameters Box-Cox power exponential distribution gives the best fit. Let's check the residuals:
+
+
+```{r, warning=FALSE, message=FALSE}
+
+# four-parameters Box-Cox power exponential
+tau <- mu
+
+BCPE <- gamlss(mu, 
+            sigma.formula = sigma,
+            nu.formula = nu,
+            tau.formula = tau,
+               family = BCPE,
+               data=data2)
+# N and EG fits
+list(BCPE_fit = BCPE$aic)
+
+# residuals
+
+plot(BCPE)
+```
+
+The shape of the residuals and the AIC of the BCPE were better than those of the N and EG distributions.
+
+
+## Buckeplots
+
+### Buckeplots with existing data (an example)
+
+First off, let's illustrate these plots with existing data. In this example, only the location parameter is modelled and a P-spline is used on one of the numeric covariates.
+
+```{r, warning=FALSE, message=FALSE}
+library(gamlss.ggplots)
+
+bccg <- gamlss(R~pb(Fl)+A+B, data=rent, family=BCCG)
+no <- gamlss(R~pb(Fl)+A+B, data=rent, family=NO)
+
+moment_bucket(bccg, no, no_bootstrap = 100)
+
+# by a categorical covariate
+moment_bucket_wrap(bccg, no, no_bootstrap = 100, xvar=rent$B) 
+
+moment_bucket_wrap(bccg, no, no_bootstrap = 100, 
+                   col_bootstrap = c('peru','red'),
+                   colour_bucket = T,
+                   # col_JB_test = 'pink',
+                   xvar=rent$Fl)
+```
+
+Another function for bucketplots
+
+```{r}
+# function 'bp' in the gamlss package does the job
+# but note the 'overlap' argument seems not to be working! (see rent$Fl)
+# note this argument applies to numeric covariates
+
+# thus a function sent by Fernanda de Bastiani is used here
+bp.fernanda(list(bccg,no), xvar=~rent$Fl*rent$B, 
+   show.legend = T,
+   overlap = 0)
+```
+To fix the error in the argument `overlap` and generate more intuitive labels for the rows and columns, try the following
+
+```{r, warning=FALSE, message=FALSE}
+
+`Floor space (sqr mtr)` <-cut(rent$Fl, 4) 
+# 4 cuts of equal length are requested 
+#note this doesn't entail equal number of observations in each level
+
+`Bathroom (0=no, 1=yes)` <- rent$B
+
+source("Bucketplot example/bp.R")
+
+bp.fernanda(list(bccg,no), 
+   xvar=~`Floor space (sqr mtr)`*`Bathroom (0=no, 1=yes)`, 
+   show.legend = T,no.bootstrap = 99,
+   overlap = 0)
+```
+
+
+### Buckeplots for current data
+
+
+```{r, warning=FALSE, message=FALSE}
+# to give nicer looking labels for the rows and columns
+Group <- data2$Group
+Condition <- data2$Condition
+
+# N=normal distribution, E=EG distribution, B=BCPE distribution
+
+bp.fernanda(list(N,EG, BCPE), xvar=~Group*Condition, 
+   show.legend = T, no.bootstrap = 99,
+   text.to.show = c('N','E','B'),
+   overlap = 0)
+```
+
+
