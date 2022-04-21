@@ -140,6 +140,8 @@ Another function for bucketplots
 # note this argument applies to numeric covariates
 
 # thus a function sent by Fernanda de Bastiani is used here
+source("bp.R")
+
 bp.fernanda(list(bccg,no), xvar=~rent$Fl*rent$B, 
    show.legend = T,
    overlap = 0)
@@ -153,8 +155,6 @@ To fix the error in the argument `overlap` and generate more intuitive labels fo
 #note this doesn't entail equal number of observations in each level
 
 `Bathroom (0=no, 1=yes)` <- rent$B
-
-source("Bucketplot example/bp.R")
 
 bp.fernanda(list(bccg,no), 
    xvar=~`Floor space (sqr mtr)`*`Bathroom (0=no, 1=yes)`, 
