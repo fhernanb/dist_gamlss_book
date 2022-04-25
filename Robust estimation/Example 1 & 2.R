@@ -19,25 +19,67 @@ source("Robust estimation/BEorb.R")
 source("Robust estimation/gamlssRobust.R")
 source("Robust estimation/mywormplot.R")
 
-# To load the simulated data
-source("Robust estimation/simulated data.R")
 
-datos1 <- data.frame(y=y1)
-datos2 <- data.frame(y=y2)
+# To simulate de datasets -------------------------------------------------
 
-# Creando el histograma y boxplot -----------------------------------------
+# Beta example
+
+# Fix seed
+set.seed(31416)
+# sample size
+number_of_obs <- 500
+# proportions of mix
+proportions <- sample(c(0, 1, 2), number_of_obs,
+                      replace=TRUE, prob=c(0.01, 0.01, 1-0.01-0.01))
+# Reference distribution (Beta(5,5))
+shape_1 <- 5
+shape_2 <- 5
+beta_ref <- rBEo(n=number_of_obs, shape_1, shape_2)
+# lower tail
+unif_1 <- runif(number_of_obs, 0, 0.1)
+# upper tail
+unif_2 <- runif(number_of_obs, 0.9, 1)
+# Simulating the y variable
+y <- ifelse(proportions == 0, unif_1,
+             ifelse(proportions == 1, unif_2, beta_ref))
+data1 <- data.frame(y)
+
+# ExGaussian example
+
+# Fix seed
+set.seed(31416)
+# sample size
+number_of_obs <- 500
+# proportions of mix
+proportions <- sample(c(1, 0), number_of_obs,
+                      replace=TRUE, prob=c(0.9, 0.1))
+# Reference ExGaussian(0.5, 0.1, 3)
+true_mu    <- 0.5
+true_sigma <- 0.1
+true_nu    <- 3
+exgauss_ref <- gamlss.dist::rexGAUS(n=number_of_obs, 
+                                    mu=true_mu, 
+                                    sigma=true_sigma, 
+                                    nu=true_nu)
+# Tail (outliers)
+unift <- runif(number_of_obs, 0, 10)
+# Simulating the y variable
+y <- ifelse(proportions == 1, exgauss_ref, unift)
+data2 <- data.frame(y)
+
+# Histogram and boxplot ---------------------------------------------------
 
 # Beta example
 
 # Histogram
-p1 <- ggplot(data = datos1) +
+p1 <- ggplot(data = data1, aes(x=y)) +
   geom_histogram(aes(x=y, y=..density..), 
-                 bins = nclass.scott(datos1$y), 
+                 bins = nclass.scott(data1$y), 
                  colour="black", fill="white") + 
   ylab("Density")
 
 # Boxplot
-p2 <- ggplot(datos1, aes(x = "", y = y)) +
+p2 <- ggplot(data1, aes(x = "", y = y)) +
   geom_boxplot(outlier.colour="tomato", outlier.shape=8,
                outlier.size=2, notch=TRUE, width = 0.4, 
                colour="black") +
@@ -51,17 +93,17 @@ out <- grid.arrange(p1, p2, ncol=2)
 ggsave(plot=out, file="Robust estimation/data_example_1.pdf", 
        width = 6, height = 3)
 
-# exGaussina example
+# ExGaussian example
 
 # Histogram
-p1 <- ggplot(data = datos2) +
+p1 <- ggplot(data = data2) +
   geom_histogram(aes(x=y, y=..density..), 
-                 bins = nclass.scott(datos2$y), 
+                 bins = nclass.scott(data2$y), 
                  colour="black", fill="white") + 
   ylab("Density")
 
 # Boxplot
-p2 <- ggplot(datos2, aes(x = "", y = y)) +
+p2 <- ggplot(data2, aes(x = "", y = y)) +
   geom_boxplot(outlier.colour="tomato", outlier.shape=8,
                outlier.size=2, notch=TRUE, width = 0.4, 
                colour="black") +
@@ -81,14 +123,14 @@ ggsave(plot=out, file="Robust estimation/data_example_2.pdf",
 # Beta example
 
 # BEo
-mod_BEo <- gamlss(y~1, family=BEo, n.cyc=100, trace=FALSE, data=datos1)
+mod_BEo <- gamlss(y~1, family=BEo, n.cyc=100, trace=FALSE, data=data1)
 
 p1 <- mywormplot(mod_BEo) + theme_bw() + ggtitle("Beta")
 r1 <- cbind(fitted(mod_BEo)[1], 
             fitted(mod_BEo, "sigma")[1])
 
 # fit with bias correction 
-mod_BEo_correct <- gamlss(y~1, family=BEor, n.cyc=100, trace=FALSE, data=datos1)
+mod_BEo_correct <- gamlss(y~1, family=BEor, n.cyc=100, trace=FALSE, data=data1)
 
 p2 <- mywormplot(mod_BEo_correct) + theme_bw() +  
   ggtitle("Beta with bias correction")
@@ -124,7 +166,7 @@ sigma_beta <- c(fitted(mod_BEo,"sigma")[1],
 # exGaussian example
 
 # ExGaussian
-mod_exgaus <- gamlss(y~1,family=exGAUS,n.cyc=100, trace=FALSE, data=datos2)
+mod_exgaus <- gamlss(y~1,family=exGAUS,n.cyc=100, trace=FALSE, data=data2)
 
 p4 <- mywormplot(mod_exgaus)+theme_bw()+ggtitle("ExGaussian")
 r4 <- cbind(fitted(mod_exgaus)[1], 
@@ -165,12 +207,11 @@ ggsave(plot=out, file="Robust estimation/wp_both_examples.pdf",
        width = 12, height = 7)
 
 
-
 # Comparing the results ---------------------------------------------------
 
 # Beta example
 
-p1_ex1 <- ggplot(data = datos1) + 
+p1_ex1 <- ggplot(data = data1) + 
   geom_histogram(aes(x=y, y = ..density..), bins=14, 
                  colour="black", fill="white") +
   geom_function(aes(colour = "Non-robust"), 
@@ -194,7 +235,7 @@ p1_ex1 <- ggplot(data = datos1) +
   ) +
   scale_colour_manual(values = c("red", "green3", gray(.5)))
 
-p2_ex1 <- ggplot(data = datos1) + 
+p2_ex1 <- ggplot(data = data1) + 
   stat_ecdf(aes(x=y), geom="point", 
             colour=gray(.5), shape=1, size=0.9) + 
   geom_function(aes(colour = "Non-robust"), 
@@ -223,9 +264,9 @@ haz_BEo <- function(x, mu, sigma) {
   dBEo(x, mu=mu, sigma=sigma) / pBEo(x, mu=mu, sigma=sigma, lower.tail=FALSE)
 }
 
-datos1$h <- haz_BEo(x=datos1$y, mu=mu_beta[4], sigma=sigma_beta[4])
+data1$h <- haz_BEo(x=data1$y, mu=mu_beta[4], sigma=sigma_beta[4])
 
-p3_ex1 <- ggplot(data=datos1, aes(x=y, y=h)) + 
+p3_ex1 <- ggplot(data=data1, aes(x=y, y=h)) + 
   geom_point(colour=gray(.5), shape=1, size=0.9) +
   stat_function(aes(colour = "Non-robust"), 
                 fun=haz_BEo, args=list(mu=mu_beta[1], sigma=sigma_beta[1])) +
@@ -250,7 +291,7 @@ p3_ex1 <- ggplot(data=datos1, aes(x=y, y=h)) +
 
 # exGaussian example
 
-p1_ex2 <- ggplot(data = datos2) + 
+p1_ex2 <- ggplot(data = data2) + 
   geom_histogram(aes(x=y, y = ..density..), bins=20,
                  colour="black", fill="white") +
   geom_function(aes(colour = "Non-robust"), 
@@ -279,7 +320,7 @@ p1_ex2 <- ggplot(data = datos2) +
 
 # CDF
 
-p2_ex2 <- ggplot(data = datos2) + 
+p2_ex2 <- ggplot(data = data2) + 
   stat_ecdf(aes(x=y), geom="point", 
             colour=gray(.5), shape=1, size=0.9) + 
   geom_function(aes(colour = "Non-robust"), 
@@ -313,10 +354,10 @@ haz_exGAUS <- function(x, mu, sigma, nu) {
     pexGAUS(x, mu=mu, sigma=sigma, nu=nu, lower.tail=FALSE)
 }
 
-datos2$h <- haz_exGAUS(x=datos2$y, mu=mu_exg[3], 
+data2$h <- haz_exGAUS(x=data2$y, mu=mu_exg[3], 
                        sigma=sigma_exg[3], nu=nu_exg[3])
 
-p3_ex2 <- ggplot(data=datos2, aes(x=y, y=h)) + 
+p3_ex2 <- ggplot(data=data2, aes(x=y, y=h)) + 
   geom_point(colour=gray(.5), shape=1, size=0.9) +
   stat_function(aes(colour = "Non-robust"), 
                 fun=haz_exGAUS,
@@ -350,4 +391,3 @@ out_both_examples <- grid.arrange(p1_ex1, p2_ex1, p3_ex1,
 
 ggsave(plot=out_both_examples, file="Robust estimation/3plots_both_examples.pdf", 
        width = 13, height = 8)
-
