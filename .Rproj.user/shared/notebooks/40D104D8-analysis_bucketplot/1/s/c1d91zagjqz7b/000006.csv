@@ -1,0 +1,6 @@
+"0",""
+"0","moment_bucket_wrap(bccg, no, no_bootstrap = 100, "
+"0","                   col_bootstrap = c('peru','red'),"
+"0","                   colour_bucket = T,"
+"0","                   # col_JB_test = 'pink',"
+"0","                   xvar=rent$Fl)"
