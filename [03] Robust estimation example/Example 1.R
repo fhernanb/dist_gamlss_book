@@ -1,8 +1,8 @@
 
-source("Robust estimation/BEor.R")
-source("Robust estimation/BEorb.R")
-source("Robust estimation/gamlssRobust.R")
-source("Robust estimation/mywormplot.R")
+source("[03] Robust estimation example/BEor.R")
+source("[03] Robust estimation example/BEorb.R")
+source("[03] Robust estimation example/gamlssRobust.R")
+source("[03] Robust estimation example/mywormplot.R")
 
 
 library(gamlss)
