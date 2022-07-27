@@ -16,7 +16,7 @@ library(CPHshape)
 library(outliers)
 library(EnvStats)
 library(envoutliers)
-
+library(reshape2)
 
 
 # Creating data -----------------------------------------------------------
@@ -125,7 +125,7 @@ true_mod <- gamlss(y~1,family=BEo,n.cyc=100, trace=FALSE,
                    mu.fix = TRUE, mu.start=5,
                    sigma.fix = TRUE, sigma.start=5)
 
-p0 <- mywormplot(true_mod)+theme_bw()+ggtitle("True model")
+p0 <- mywormplot(true_mod) + theme_bw() + ggtitle("True model")
 
 # BEo
 mod_BEo <- gamlss(y~1, family=BEo, n.cyc=100, trace=FALSE)
